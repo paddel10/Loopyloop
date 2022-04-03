@@ -1,0 +1,27 @@
+<!-- Adding the same root's ID for view binding as other layout configurations -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_detail_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/item_detail"
+        android:name="ch.patland.loopyloop.ItemDetailFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="ch.patland.loopyloop.ItemDetailHostActivity"
+        tools:listitem="@layout/item_detail_content" />
+    <!--TextView
+        android:id="@+id/item_detail"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:textIsSelectable="true"
+        tools:context="ch.patland.loopyloop.ItemDetailFragment" /-->
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
