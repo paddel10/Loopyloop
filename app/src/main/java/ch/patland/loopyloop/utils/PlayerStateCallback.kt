@@ -13,4 +13,6 @@ interface PlayerStateCallback {
     fun onStartedPlaying(player: Player)
 
     fun onFinishedPlaying(player: Player)
+
+    fun isMuted(): Boolean
 }

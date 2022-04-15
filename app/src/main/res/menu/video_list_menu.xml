@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mayApp="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_mute"
+        android:icon="@drawable/ic_baseline_volume_up_24"
+        android:title=""
+        android:checkable="true"
+        mayApp:showAsAction="always" />
+</menu>

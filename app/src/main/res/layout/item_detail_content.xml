@@ -34,7 +34,7 @@
             >
         <TextView
             android:id="@+id/id_item_name"
-            app:display_name="@{dataModel.displayName}"
+            android:text="@{dataModel.displayName}"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_marginBottom="8dp"
@@ -71,7 +71,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:on_state_change="@{callback}"
                 app:progressbar="@{progressBar}"
-                app:resize_mode="fill"
+                app:resize_mode="zoom"
                 app:show_buffering="when_playing"
                 app:surface_type="texture_view"
                 app:thumbnail="@{thumbnail}"
@@ -108,10 +108,9 @@
                     android:gravity="bottom|end"
                     android:paddingStart="4dp"
                     android:paddingEnd="5dp"
-                    android:text=""
                     android:textColor="@color/durationTextColor"
                     android:textSize="14sp"
-                    app:video_duration="@{dataModel.duration}" />
+                    android:text="@{dataModel.formatDuration}" />
             </RelativeLayout>
             <ImageView
                 android:layout_width="25dp"
@@ -143,7 +142,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            app:date_taken="@{dataModel.formatDateTaken()}"
+            android:text="@{dataModel.formatDateTaken()}"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/duration"
@@ -156,7 +155,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="5dp"
-            app:video_size="@{dataModel.formatSize()}"
+            android:text="@{dataModel.formatSize()}"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintLeft_toRightOf="@+id/date_taken"
             app:layout_constraintRight_toRightOf="parent"

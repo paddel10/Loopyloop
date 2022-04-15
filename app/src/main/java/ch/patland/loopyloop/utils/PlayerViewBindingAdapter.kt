@@ -11,7 +11,6 @@ import androidx.databinding.BindingAdapter
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 
@@ -72,27 +71,13 @@ class PlayerViewAdapter {
             setKeepContentOnPlayerReset(true)
             // We'll show the controller, change to true if want controllers as pause and start
             this.useController = false
-            this.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-            // Provide url to load the video from here
 
-            /*val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri))*/
-
-            //val mediaSource = ProgressiveMediaSource.Factory(FileDataSource.Factory()).createMediaSource(uri)
-            //val url = "https://static.klliq.com/videos/uWPJnU7z5OysYjptZkBI6T1HANjC4WdP_hd.mp4"
-            //val mediaSource = ProgressiveMediaSource.Factory(DefaultHttpDataSource.Factory()).createMediaSource(MediaItem.fromUri(uri))
-            // Create a data source factory.
-            // Create a data source factory.
-            val url = "https://static.klliq.com/videos/uWPJnU7z5OysYjptZkBI6T1HANjC4WdP_hd.mp4"
-            //val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-            // val dataSourceFactory: DataSource.Factory = FileDataSource.Factory()
             val dataSourceFactory = DefaultDataSource.Factory(context)
             // Create a progressive media source pointing to a stream uri.
             val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(MediaItem.fromUri(uri))
             player.setMediaSource(mediaSource)
-            // player.setMediaItem(MediaItem.fromUri(uri));
-            // player.setPlayWhenReady(true);
+
             player.prepare()
 
             this.player = player
@@ -107,6 +92,15 @@ class PlayerViewAdapter {
                 init {
                     Log.d("PlayerViewAdapter", "Player.Listener called")
                 }
+                override fun onTimelineChanged(timeline: Timeline, timelineChangeReason: Int) {
+                    if (callback.isMuted()) {
+                        Log.d("mute", "it is muted")
+                        player.volume = 0f;
+                    } else {
+                        player.volume = 1f;
+                        Log.d("mute", "it is NOT muted")
+                    }
+                }
                 override fun onPlayerError(error: PlaybackException) {
                     super.onPlayerError(error)
                     this@loadVideo.context.toast("Oops! Error occurred while playing media.")
@@ -116,6 +110,8 @@ class PlayerViewAdapter {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     Log.d("PlayerViewAdapter", "onPlayerStateChanged() " + playbackState.toString())
                     super.onPlaybackStateChanged(playbackState)
+
+
 
                     if (playbackState == Player.STATE_BUFFERING){
                         callback.onVideoBuffering(player)

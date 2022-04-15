@@ -3,11 +3,9 @@ package ch.patland.loopyloop
 import android.content.ClipData
 import android.os.Bundle
 import android.util.Log
-import android.view.DragEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +27,7 @@ import ch.patland.loopyloop.utils.RecyclerViewScrollListener
 class ItemDetailFragment : Fragment() {
     private val TAG = "ItemDetailFragment"
     private var mAdapter: VideosRecyclerAdapter? = null
-
+    protected var mAppPrefs: AppPrefs = AppPrefs()
     /**
      * The placeholder content this fragment is presenting.
      */
@@ -86,9 +84,46 @@ class ItemDetailFragment : Fragment() {
         updateContent()
         rootView.setOnDragListener(dragListener)
 
+        setHasOptionsMenu(true)
         return rootView
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.video_list_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+
+        val isChecked: Boolean = mAppPrefs.getMuteChecked(requireContext())
+        val item = menu.findItem(R.id.action_mute)
+        item.isChecked = isChecked
+        if (isChecked) {
+            // turnOffVolume()
+            item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_off_24)
+        } else {
+            // turnOnVolume()
+            item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_up_24)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        val id = item.itemId
+
+        if (id == R.id.action_mute) {
+            item.isChecked = !item.isChecked
+            mAppPrefs.setMuteChecked(requireContext(), item.isChecked)
+            if (item.isChecked) {
+                // turnOffVolume()
+                item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_off_24)
+            } else {
+                // turnOnVolume()
+                item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_up_24)
+            }
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

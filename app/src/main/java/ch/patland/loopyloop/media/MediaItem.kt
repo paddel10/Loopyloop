@@ -1,6 +1,7 @@
 package ch.patland.loopyloop.media
 
 import android.net.Uri
+import android.text.format.DateUtils
 import android.util.Log
 import java.text.SimpleDateFormat
 import kotlin.time.Duration.Companion.milliseconds
@@ -31,8 +32,7 @@ data class MediaItem(
     }
 
     fun formatDuration(): String {
-        Log.d("duration", "dur = " + duration.toString())
-        return duration.milliseconds.toString()
+        return DateUtils.formatElapsedTime(duration / 1000)
     }
 
     fun formatSize() =

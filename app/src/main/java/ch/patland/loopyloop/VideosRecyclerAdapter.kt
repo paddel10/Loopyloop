@@ -19,6 +19,7 @@ class VideosRecyclerAdapter(
    : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PlayerStateCallback {
 
     private var mItemClickListener: OnItemClickListener? = null
+    private val mAppPrefs: AppPrefs = AppPrefs()
 
     fun updateList(modelList: ArrayList<MediaItem>) {
         this.modelList = modelList
@@ -114,4 +115,8 @@ class VideosRecyclerAdapter(
     }
 
     override fun onFinishedPlaying(player: Player) {}
+
+    override fun isMuted(): Boolean {
+        return mAppPrefs.getMuteChecked(mContext)
+    }
 }
