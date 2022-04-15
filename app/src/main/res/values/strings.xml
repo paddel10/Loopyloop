@@ -3,4 +3,5 @@
     <string name="title_item_detail">Item Detail</string>
 
     <string name="storage">Kindly requesting for storage permission.</string>
+    <string name="thumbnail_set_by_glide">thumbnail set by glide</string>
 </resources>
