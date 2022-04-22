@@ -4,7 +4,6 @@ import android.net.Uri
 import android.text.format.DateUtils
 import android.util.Log
 import java.text.SimpleDateFormat
-import kotlin.time.Duration.Companion.milliseconds
 
 data class MediaItem(
     val id: Long,

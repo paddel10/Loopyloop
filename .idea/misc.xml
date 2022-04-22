@@ -17,6 +17,7 @@
         <entry key="app/src/main/res/layout/fragment_item_list.xml" value="0.33" />
         <entry key="app/src/main/res/layout/item_detail_content.xml" value="0.13714285714285715" />
         <entry key="app/src/main/res/layout/item_list_content.xml" value="0.75" />
+        <entry key="app/src/main/res/layout/item_row.xml" value="0.18125" />
         <entry key="app/src/main/res/menu/video_list_menu.xml" value="0.18125" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.173" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.173" />
