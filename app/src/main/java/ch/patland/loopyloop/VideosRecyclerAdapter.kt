@@ -44,10 +44,10 @@ class VideosRecyclerAdapter(
         //Here you can fill your row view
         if (holder is VideoPlayerViewHolder) {
             val model = getItem(position)
-            Log.d("0-VideosRecyclderAdapter", "onBindViewHolder() called - VideoPlayerViewHolder instance, position = " + position.toString() + ", name = " + model.displayName)
+            val genericViewHolder = holder
 
             // send data to view holder
-            holder.onBind(model)
+            genericViewHolder.onBind(model)
         }
     }
 
@@ -56,7 +56,7 @@ class VideosRecyclerAdapter(
         // getBindingAdapterPosition() or if you want the position as RecyclerView sees it,
         // you should call getAbsoluteAdapterPosition().
         // holder.absoluteAdapterPosition
-        val position = holder.bindingAdapterPosition // holder.adapterPosition
+        val position = holder.absoluteAdapterPosition // holder.adapterPosition
         Log.d("position", "bindingAdapterPosition = " + holder.bindingAdapterPosition.toString())
         Log.d("position", "absoluteAdapterPosition = " + holder.absoluteAdapterPosition.toString())
         Log.d("position", "layoutPosition = " + holder.layoutPosition.toString())
@@ -92,15 +92,15 @@ class VideosRecyclerAdapter(
             binding.root.setOnClickListener {
                 mItemClickListener!!.onItemClick(
                     it,
-                    bindingAdapterPosition,//absoluteAdapterPosition,
+                    absoluteAdapterPosition,//absoluteAdapterPosition,
                     model
                 )
             }
-            Log.d("0-VideoPlayerViewHolder", "onBind() bindingAdapterPosition = " + bindingAdapterPosition.toString())
+            Log.d("0-VideoPlayerViewHolder", "onBind() bindingAdapterPosition = " + absoluteAdapterPosition.toString())
             binding.apply {
                 dataModel = model
                 callback = this@VideosRecyclerAdapter
-                index = bindingAdapterPosition // absoluteAdapterPosition
+                index = absoluteAdapterPosition // absoluteAdapterPosition
                 executePendingBindings()
             }
         }

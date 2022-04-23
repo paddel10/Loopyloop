@@ -26,6 +26,7 @@ class PlayerViewAdapter {
         private var playersMap: MutableMap<Int, ExoPlayer>  = mutableMapOf()
         // for hold current player
         private var currentPlayingVideo: Pair<Int, ExoPlayer>? = null
+        private var currentPlayingIndex: Int = -1
         fun releaseAllPlayers(){
             playersMap.map {
                 it.value.release()
@@ -57,7 +58,6 @@ class PlayerViewAdapter {
         }
 
         fun playIndexThenPausePreviousPlayer(index: Int){
-            Log.d("playIndexThenPausePreviousPlayer", "index = " + index.toString())
             if (playersMap.get(index)?.playWhenReady == false) {
                 pauseCurrentPlayingVideo()
                 playersMap.get(index)?.playWhenReady = true
@@ -96,8 +96,8 @@ class PlayerViewAdapter {
             this.player = player
 
             // add player with its index to map
-            /*if (playersMap.containsKey(item_index))
-                playersMap.remove(item_index)*/
+            if (playersMap.containsKey(item_index))
+                playersMap.remove(item_index)
 
             if (item_index != null)
                 playersMap[item_index] = player
@@ -118,8 +118,7 @@ class PlayerViewAdapter {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     Log.d("PlayerViewAdapter", "onPlayerStateChanged() " + playbackState.toString())
                     super.onPlaybackStateChanged(playbackState)
-
-                    if (playbackState == Player.STATE_BUFFERING){
+                    if (playbackState == Player.STATE_BUFFERING) {
                         callback.onVideoBuffering(player)
                         // Buffering..
                         // set progress bar visible here
@@ -128,12 +127,15 @@ class PlayerViewAdapter {
                         progressbar.visibility = View.VISIBLE
                     }
 
-                    if (playbackState == Player.STATE_READY){
+                    if (playbackState == Player.STATE_READY) {
                         // [PlayerView] has fetched the video duration so this is the block to hide the buffering progress bar
                         progressbar.visibility = View.GONE
                         // set thumbnail gone
                         thumbnail.visibility = View.GONE
-                        callback.onVideoDurationRetrieved(this@loadVideo.player!!.duration, player)
+                        callback.onVideoDurationRetrieved(
+                            this@loadVideo.player!!.duration,
+                            player
+                        )
                     }
 
                     if (playbackState == Player.STATE_READY && player.playWhenReady) {
@@ -141,12 +143,12 @@ class PlayerViewAdapter {
                         callback.onStartedPlaying(player)
                     }
 
-                    if (playbackState == Player.STATE_ENDED) {
+                    /*if (playbackState == Player.STATE_ENDED) {
                         progressbar.visibility = View.GONE
                         callback.onFinishedPlaying(player)
                         player.pause()
                         player.seekTo(0)
-                    }
+                    }*/
                 }
             })
         }

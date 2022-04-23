@@ -1,0 +1,6 @@
+<resources>
+
+    <style name="Widget.Theme.Loopyloop.ButtonBar.Fullscreen" parent="Theme.Loopyloop.NoActionBar">
+
+    </style>
+</resources>

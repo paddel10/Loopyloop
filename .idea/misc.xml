@@ -6,6 +6,7 @@
         <entry key="../../../../../layout/custom_preview.xml" value="0.12050359712230216" />
         <entry key="../../../.gradle/caches/transforms-3/6c067409ee083fb9ad5b1d4fac925733/transformed/kohii-exoplayer-1.0.0.2010004/res/layout/kohii_player_spherical_view.xml" value="0.17274569402228976" />
         <entry key="app/src/main/res/drawable-v24/ic_volume_up_grey_24dp.xml" value="0.1305" />
+        <entry key="app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_baseline_folder_24.xml" value="0.1905" />
         <entry key="app/src/main/res/drawable/ic_baseline_volume_off_24.xml" value="0.1905" />
         <entry key="app/src/main/res/drawable/ic_baseline_volume_up_24.xml" value="0.1905" />
@@ -15,6 +16,7 @@
         <entry key="app/src/main/res/layout/fragment_directory_list_list.xml" value="0.11944444444444445" />
         <entry key="app/src/main/res/layout/fragment_item_detail.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_item_list.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_video_detail.xml" value="0.343811394891945" />
         <entry key="app/src/main/res/layout/item_detail_content.xml" value="0.13714285714285715" />
         <entry key="app/src/main/res/layout/item_list_content.xml" value="0.75" />
         <entry key="app/src/main/res/layout/item_row.xml" value="0.18125" />

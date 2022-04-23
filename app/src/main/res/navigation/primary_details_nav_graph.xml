@@ -22,5 +22,13 @@
             android:name="item_id"
             android:defaultValue=""
             app:argType="string" />
+        <action
+            android:id="@+id/action_item_detail_fragment_to_videoDetailFragment"
+            app:destination="@id/videoDetailFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/videoDetailFragment"
+        android:name="ch.patland.loopyloop.VideoDetailFragment"
+        android:label="fragment_video_detail"
+        tools:layout="@layout/fragment_video_detail" />
 </navigation>

@@ -8,8 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_URI
 import ch.patland.loopyloop.databinding.FragmentItemDetailBinding
 
 import ch.patland.loopyloop.media.MediaCursor
@@ -151,7 +153,10 @@ class ItemDetailFragment : Fragment() {
 
         mAdapter!!.SetOnItemClickListener(object : VideosRecyclerAdapter.OnItemClickListener {
             override fun onItemClick(view: View?, position: Int, model: MediaItem?) {
-
+                Log.d("itemClick", "clicked! " + (model?.displayName ?: ""))
+                val bundle = Bundle()
+                bundle.putString(ARG_URI, model?.uri.toString())
+                view?.findNavController()?.navigate(R.id.action_item_detail_fragment_to_videoDetailFragment, bundle)
             }
         })
         // use a linear layout manager
@@ -177,6 +182,13 @@ class ItemDetailFragment : Fragment() {
          */
         const val ARG_ITEM_ID = "item_id"
         const val ARG_ITEM_DIRECTORY = "item_directory"
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        //(activity as? AppCompatActivity)?.supportActionBar?.show()
+        Log.d("resume", "resumed")
     }
 
     override fun onDestroyView() {
