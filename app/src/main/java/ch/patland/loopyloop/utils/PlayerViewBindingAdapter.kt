@@ -37,6 +37,18 @@ class PlayerViewAdapter {
             playersMap[index]?.release()
         }
 
+        fun turnOffVolume() {
+            playersMap.map {
+                it.value.volume = 0f
+            }
+        }
+
+        fun turnOnVolume() {
+            playersMap.map {
+                it.value.volume = 1f
+            }
+        }
+
         // call when scroll to pause any playing player
         fun pauseCurrentPlayingVideo(){
             if (currentPlayingVideo != null){
@@ -45,6 +57,7 @@ class PlayerViewAdapter {
         }
 
         fun playIndexThenPausePreviousPlayer(index: Int){
+            Log.d("playIndexThenPausePreviousPlayer", "index = " + index.toString())
             if (playersMap.get(index)?.playWhenReady == false) {
                 pauseCurrentPlayingVideo()
                 playersMap.get(index)?.playWhenReady = true
@@ -58,8 +71,8 @@ class PlayerViewAdapter {
         * thumbnail for show before video start
         * */
         @JvmStatic
-        @BindingAdapter(value = ["video_uri", "on_state_change", "progressbar", "thumbnail", "item_index", "autoPlay"], requireAll = false)
-        fun StyledPlayerView.loadVideo(uri: Uri, callback: PlayerStateCallback, progressbar: ProgressBar, thumbnail: ImageView, item_index: Int? = null, autoPlay: Boolean = false) {
+        @BindingAdapter(value = ["video_uri", "display_name", "on_state_change", "progressbar", "thumbnail", "item_index", "autoPlay"], requireAll = false)
+        fun StyledPlayerView.loadVideo(uri: Uri, displayName: String, callback: PlayerStateCallback, progressbar: ProgressBar, thumbnail: ImageView, item_index: Int? = null, autoPlay: Boolean = false) {
             Log.d("PlayerViewAdapter", "loadVideo() " + uri.toString() + ", index = " + item_index.toString() + ", autoplay = " + autoPlay.toString())
             val builder = DefaultLoadControl.Builder()
             builder.setBufferDurationsMs(1000, 1000, 1000, 1000)
@@ -83,24 +96,19 @@ class PlayerViewAdapter {
             this.player = player
 
             // add player with its index to map
-            if (playersMap.containsKey(item_index))
-                playersMap.remove(item_index)
+            /*if (playersMap.containsKey(item_index))
+                playersMap.remove(item_index)*/
+
             if (item_index != null)
                 playersMap[item_index] = player
-
+            Log.d("playersMap", "item_index = " + item_index.toString() + ", playerMap.size = " + playersMap.size.toString())
+            if (callback.isMuted()) {
+                this.player!!.volume = 0f
+            } else {
+                this.player!!.volume = 1f
+            }
             this.player!!.addListener(object : Player.Listener {
-                init {
-                    Log.d("PlayerViewAdapter", "Player.Listener called")
-                }
-                override fun onTimelineChanged(timeline: Timeline, timelineChangeReason: Int) {
-                    if (callback.isMuted()) {
-                        Log.d("mute", "it is muted")
-                        player.volume = 0f;
-                    } else {
-                        player.volume = 1f;
-                        Log.d("mute", "it is NOT muted")
-                    }
-                }
+
                 override fun onPlayerError(error: PlaybackException) {
                     super.onPlayerError(error)
                     this@loadVideo.context.toast("Oops! Error occurred while playing media.")
@@ -110,8 +118,6 @@ class PlayerViewAdapter {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     Log.d("PlayerViewAdapter", "onPlayerStateChanged() " + playbackState.toString())
                     super.onPlaybackStateChanged(playbackState)
-
-
 
                     if (playbackState == Player.STATE_BUFFERING){
                         callback.onVideoBuffering(player)
@@ -130,7 +136,7 @@ class PlayerViewAdapter {
                         callback.onVideoDurationRetrieved(this@loadVideo.player!!.duration, player)
                     }
 
-                    if (playbackState == Player.STATE_READY && player.playWhenReady){
+                    if (playbackState == Player.STATE_READY && player.playWhenReady) {
                         // [PlayerView] has started playing/resumed the video
                         callback.onStartedPlaying(player)
                     }

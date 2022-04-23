@@ -76,43 +76,21 @@
                     app:show_buffering="when_playing"
                     app:surface_type="texture_view"
                     app:thumbnail="@{thumbnail}"
-                    app:video_uri="@{dataModel.uri}" />
+                    app:video_uri="@{dataModel.uri}"
+                    app:display_name="@{dataModel.displayName}"/>
 
-                <RelativeLayout
-                    android:id="@+id/linearLayout"
+                <ImageView
+                    android:id="@+id/thumbnail"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingLeft="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingRight="0dp"
-                    android:paddingBottom="0dp">
+                    android:background="#fff"
+                    android:contentDescription="@string/thumbnail_set_by_glide"
+                    android:scaleType="centerInside"
+                    app:video_duration="@{dataModel.duration}"
+                    app:video_uri="@{dataModel.uri}"
+                    app:display_name="@{dataModel.displayName}"
+                    />
 
-                    <ImageView
-                        android:id="@+id/thumbnail"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#fff"
-                        android:contentDescription="@string/thumbnail_set_by_glide"
-                        android:scaleType="centerInside"
-                        app:video_duration="@{dataModel.duration}"
-                        app:video_uri="@{dataModel.uri}" />
-
-                    <TextView
-                        android:id="@+id/video_duration"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_margin="0dp"
-                        android:background="@color/durationBackgroundColor"
-                        android:gravity="bottom|end"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="5dp"
-                        android:textColor="@color/durationTextColor"
-                        android:textSize="14sp"
-                        android:text="@{dataModel.formatDuration}" />
-                </RelativeLayout>
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
@@ -137,32 +115,174 @@
 
             </FrameLayout>
 
+            <!-- date taken
             <TextView
-                android:id="@+id/date_taken"
-                android:textSize="14sp"
+                android:id="@+id/label_date_taken"
+                android:textSize="@dimen/font_size_item_row"
+                android:textStyle="bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@{dataModel.formatDateTaken()}"
+                android:text="@string/label_date_taken"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/duration"
+                app:layout_constraintRight_toLeftOf="@+id/date_taken"
                 app:layout_constraintTop_toBottomOf="@id/media_container"
                 app:layout_constraintVertical_chainStyle="spread_inside" />
             <TextView
+                android:id="@+id/date_taken"
+                android:textSize="@dimen/font_size_item_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="5dp"
+                android:text="@{dataModel.formatDateTaken()}"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toRightOf="@+id/label_date_taken"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/media_container"
+                app:layout_constraintVertical_chainStyle="spread_inside"
+            /> -->
+            <!-- date added
+            <TextView
+                android:id="@+id/label_date_added"
+                android:textSize="@dimen/font_size_item_row"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/label_date_added"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/date_added"
+                app:layout_constraintTop_toBottomOf="@id/label_date_taken"
+                app:layout_constraintVertical_chainStyle="spread_inside" />
+            <TextView
+                android:id="@+id/date_added"
+                android:textSize="@dimen/font_size_item_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="5dp"
+                android:text="@{dataModel.formatDateAdded()}"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toRightOf="@+id/label_date_added"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_date_taken"
+                app:layout_constraintVertical_chainStyle="spread_inside"
+                /> -->
+            <!-- date modified
+            <TextView
+                android:id="@+id/label_date_modified"
+                android:textSize="@dimen/font_size_item_row"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/label_date_modified"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/date_modified"
+                app:layout_constraintTop_toBottomOf="@id/label_date_added"
+                app:layout_constraintVertical_chainStyle="spread_inside" />
+            <TextView
+                android:id="@+id/date_modified"
+                android:textSize="@dimen/font_size_item_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="5dp"
+                android:text="@{dataModel.formatDateModified()}"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toRightOf="@+id/label_date_modified"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_date_added"
+                app:layout_constraintVertical_chainStyle="spread_inside"
+                /> -->
+            <!-- date last modified -->
+            <TextView
+                android:id="@+id/label_date_last_modified"
+                android:textSize="@dimen/font_size_item_row"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/label_date_last_modified"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/date_last_modified"
+                app:layout_constraintTop_toBottomOf="@id/media_container"
+                app:layout_constraintVertical_chainStyle="spread_inside" />
+            <TextView
+                android:id="@+id/date_last_modified"
+                android:textSize="@dimen/font_size_item_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="5dp"
+                android:text="@{dataModel.formatLastModified()}"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toRightOf="@+id/label_date_last_modified"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/media_container"
+                app:layout_constraintVertical_chainStyle="spread_inside"
+                />
+            <!-- duration -->
+            <TextView
+                android:id="@+id/label_duration"
+                android:textSize="@dimen/font_size_item_row"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/label_duration"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/duration"
+                app:layout_constraintTop_toBottomOf="@id/label_date_last_modified"
+                app:layout_constraintVertical_chainStyle="spread_inside" />
+            <TextView
                 android:id="@+id/duration"
-                android:textSize="14sp"
+                android:textSize="@dimen/font_size_item_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="5dp"
+                android:text="@{dataModel.formatDurationLong()}"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toRightOf="@+id/label_duration"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/date_last_modified"
+                app:layout_constraintVertical_chainStyle="spread_inside"
+                />
+            <!-- size  -->
+            <TextView
+                android:id="@+id/label_size"
+                android:textSize="@dimen/font_size_item_row"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/label_size"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/size"
+                app:layout_constraintTop_toBottomOf="@id/label_duration"
+                app:layout_constraintVertical_chainStyle="spread_inside" />
+            <TextView
+                android:id="@+id/size"
+                android:textSize="@dimen/font_size_item_row"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="5dp"
                 android:text="@{dataModel.formatSize()}"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
-                app:layout_constraintLeft_toRightOf="@+id/date_taken"
+                app:layout_constraintLeft_toRightOf="@+id/label_size"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/media_container"
+                app:layout_constraintTop_toBottomOf="@id/duration"
                 app:layout_constraintVertical_chainStyle="spread_inside"
-            />
+                />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 

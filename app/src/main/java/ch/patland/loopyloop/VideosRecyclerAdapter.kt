@@ -40,14 +40,14 @@ class VideosRecyclerAdapter(
     override fun onBindViewHolder(
         holder: RecyclerView.ViewHolder,
         position: Int) {
-
+        Log.d("0-VideosRecyclderAdapter", "onBindViewHolder() called, position = " + position.toString())
         //Here you can fill your row view
         if (holder is VideoPlayerViewHolder) {
             val model = getItem(position)
-            val genericViewHolder = holder
+            Log.d("0-VideosRecyclderAdapter", "onBindViewHolder() called - VideoPlayerViewHolder instance, position = " + position.toString() + ", name = " + model.displayName)
 
             // send data to view holder
-            genericViewHolder.onBind(model)
+            holder.onBind(model)
         }
     }
 
@@ -96,7 +96,7 @@ class VideosRecyclerAdapter(
                     model
                 )
             }
-
+            Log.d("0-VideoPlayerViewHolder", "onBind() bindingAdapterPosition = " + bindingAdapterPosition.toString())
             binding.apply {
                 dataModel = model
                 callback = this@VideosRecyclerAdapter

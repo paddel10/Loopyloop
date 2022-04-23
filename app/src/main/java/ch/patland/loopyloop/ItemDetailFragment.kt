@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,8 +15,11 @@ import ch.patland.loopyloop.databinding.FragmentItemDetailBinding
 import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaItem
 import ch.patland.loopyloop.placeholder.PlaceholderContent
+import ch.patland.loopyloop.utils.PlayerViewAdapter
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.playIndexThenPausePreviousPlayer
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.releaseAllPlayers
+import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOffVolume
+import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOnVolume
 import ch.patland.loopyloop.utils.RecyclerViewScrollListener
 
 /**
@@ -96,10 +100,10 @@ class ItemDetailFragment : Fragment() {
         val item = menu.findItem(R.id.action_mute)
         item.isChecked = isChecked
         if (isChecked) {
-            // turnOffVolume()
+            turnOffVolume()
             item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_off_24)
         } else {
-            // turnOnVolume()
+            turnOnVolume()
             item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_up_24)
         }
     }
@@ -114,10 +118,10 @@ class ItemDetailFragment : Fragment() {
             item.isChecked = !item.isChecked
             mAppPrefs.setMuteChecked(requireContext(), item.isChecked)
             if (item.isChecked) {
-                // turnOffVolume()
+                turnOffVolume()
                 item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_off_24)
             } else {
-                // turnOnVolume()
+                turnOnVolume()
                 item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_up_24)
             }
             return true

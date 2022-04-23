@@ -4,4 +4,10 @@
 
     <string name="storage">Kindly requesting for storage permission.</string>
     <string name="thumbnail_set_by_glide">thumbnail set by glide</string>
+    <string name="label_date_taken">Video taken</string>
+    <string name="label_date_added">Video added</string>
+    <string name="label_date_modified">Video modified</string>
+    <string name="label_date_last_modified">Last modified</string>
+    <string name="label_duration">Duration</string>
+    <string name="label_size">Size</string>
 </resources>
