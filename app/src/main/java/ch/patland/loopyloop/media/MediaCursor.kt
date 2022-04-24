@@ -5,7 +5,11 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.lifecycle.MutableLiveData
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class MediaCursor (val context: Context) {
     var idColumn = -1

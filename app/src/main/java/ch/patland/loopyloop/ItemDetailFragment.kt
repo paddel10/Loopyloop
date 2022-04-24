@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_CURRENT_POSITION
+import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_IS_MUTE
 import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_URI
 import ch.patland.loopyloop.databinding.FragmentItemDetailBinding
 
@@ -18,6 +20,7 @@ import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaItem
 import ch.patland.loopyloop.placeholder.PlaceholderContent
 import ch.patland.loopyloop.utils.PlayerViewAdapter
+import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentPosition
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.playIndexThenPausePreviousPlayer
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.releaseAllPlayers
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOffVolume
@@ -153,9 +156,10 @@ class ItemDetailFragment : Fragment() {
 
         mAdapter!!.SetOnItemClickListener(object : VideosRecyclerAdapter.OnItemClickListener {
             override fun onItemClick(view: View?, position: Int, model: MediaItem?) {
-                Log.d("itemClick", "clicked! " + (model?.displayName ?: ""))
                 val bundle = Bundle()
                 bundle.putString(ARG_URI, model?.uri.toString())
+                bundle.putBoolean(ARG_IS_MUTE, mAppPrefs.getMuteChecked(requireContext()))
+                bundle.putLong(ARG_CURRENT_POSITION, getCurrentPosition(position))
                 view?.findNavController()?.navigate(R.id.action_item_detail_fragment_to_videoDetailFragment, bundle)
             }
         })

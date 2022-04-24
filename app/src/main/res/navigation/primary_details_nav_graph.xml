@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/item_list_fragment"
         android:name="ch.patland.loopyloop.ItemListFragment"
-        android:label="LoopyLoop">
+        android:label="Loopyloop">
         <action
             android:id="@+id/show_item_detail"
             app:destination="@id/item_detail_fragment" />

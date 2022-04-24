@@ -50,6 +50,13 @@ class PlayerViewAdapter {
             }
         }
 
+        fun getCurrentPosition(index: Int): Long {
+            if (playersMap[index] !== null) {
+                return playersMap[index]!!.currentPosition
+            }
+            return 0
+        }
+
         // call when scroll to pause any playing player
         fun pauseCurrentPlayingVideo(){
             if (currentPlayingVideo != null){
@@ -71,8 +78,8 @@ class PlayerViewAdapter {
         * thumbnail for show before video start
         * */
         @JvmStatic
-        @BindingAdapter(value = ["video_uri", "display_name", "on_state_change", "progressbar", "thumbnail", "item_index", "autoPlay"], requireAll = false)
-        fun StyledPlayerView.loadVideo(uri: Uri, displayName: String, callback: PlayerStateCallback, progressbar: ProgressBar, thumbnail: ImageView, item_index: Int? = null, autoPlay: Boolean = false) {
+        @BindingAdapter(value = ["video_uri", "display_name", "on_state_change", "thumbnail", "item_index", "autoPlay"], requireAll = false)
+        fun StyledPlayerView.loadVideo(uri: Uri, displayName: String, callback: PlayerStateCallback, thumbnail: ImageView, item_index: Int? = null, autoPlay: Boolean = false) {
             Log.d("PlayerViewAdapter", "loadVideo() " + uri.toString() + ", index = " + item_index.toString() + ", autoplay = " + autoPlay.toString())
             val builder = DefaultLoadControl.Builder()
             builder.setBufferDurationsMs(1000, 1000, 1000, 1000)
@@ -124,12 +131,9 @@ class PlayerViewAdapter {
                         // set progress bar visible here
                         // set thumbnail visible
                         thumbnail.visibility = View.VISIBLE
-                        progressbar.visibility = View.VISIBLE
                     }
 
                     if (playbackState == Player.STATE_READY) {
-                        // [PlayerView] has fetched the video duration so this is the block to hide the buffering progress bar
-                        progressbar.visibility = View.GONE
                         // set thumbnail gone
                         thumbnail.visibility = View.GONE
                         callback.onVideoDurationRetrieved(
@@ -142,13 +146,6 @@ class PlayerViewAdapter {
                         // [PlayerView] has started playing/resumed the video
                         callback.onStartedPlaying(player)
                     }
-
-                    /*if (playbackState == Player.STATE_ENDED) {
-                        progressbar.visibility = View.GONE
-                        callback.onFinishedPlaying(player)
-                        player.pause()
-                        player.seekTo(0)
-                    }*/
                 }
             })
         }

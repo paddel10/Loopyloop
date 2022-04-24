@@ -32,6 +32,8 @@ class VideoDetailFragment : Fragment() {
     private var _binding: FragmentVideoDetailBinding? = null
 
     private lateinit var uri: Uri
+    private var isMute: Boolean = false
+    private var currentPosition: Long = 0
     private lateinit var mPlayer: ExoPlayer
 
     // This property is only valid between onCreateView and
@@ -51,8 +53,13 @@ class VideoDetailFragment : Fragment() {
                 // arguments. In a real-world scenario, use a Loader
                 // to load content from a content provider.
                 uri = Uri.parse(it.getString(ARG_URI))
-
                 // item = PlaceholderContent.ITEM_MAP[it.getString(ARG_ITEM_ID)]
+            }
+            if (it.containsKey(ARG_IS_MUTE)) {
+                isMute = it.getBoolean(ARG_IS_MUTE)
+            }
+            if (it.containsKey(ARG_CURRENT_POSITION)) {
+                currentPosition = it.getLong(ARG_CURRENT_POSITION)
             }
         }
 
@@ -68,12 +75,18 @@ class VideoDetailFragment : Fragment() {
         mPlayer.playWhenReady = true
         mPlayer.repeatMode = Player.REPEAT_MODE_ALL
 
+        if (isMute) {
+            mPlayer.volume = 0f
+        } else {
+            mPlayer.volume = 1f
+        }
+
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
         // Create a progressive media source pointing to a stream uri.
         val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(uri))
         mPlayer.setMediaSource(mediaSource)
-
+        mPlayer.seekTo(currentPosition)
         mPlayer.prepare()
     }
 
@@ -115,6 +128,8 @@ class VideoDetailFragment : Fragment() {
 
     companion object {
         const val ARG_URI = "uri"
+        const val ARG_IS_MUTE = "is_mute"
+        const val ARG_CURRENT_POSITION = "current_position"
     }
 
     override fun onDestroyView() {
