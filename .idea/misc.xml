@@ -10,6 +10,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_folder_24.xml" value="0.1905" />
         <entry key="app/src/main/res/drawable/ic_baseline_volume_off_24.xml" value="0.1905" />
         <entry key="app/src/main/res/drawable/ic_baseline_volume_up_24.xml" value="0.1905" />
+        <entry key="app/src/main/res/drawable/ic_loopyloop.xml" value="0.2625" />
         <entry key="app/src/main/res/layout-sw600dp/fragment_item_detail.xml" value="0.130451415455241" />
         <entry key="app/src/main/res/layout-sw600dp/fragment_item_list.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_item_detail.xml" value="0.33" />
@@ -21,7 +22,7 @@
         <entry key="app/src/main/res/layout/item_list_content.xml" value="0.75" />
         <entry key="app/src/main/res/layout/item_row.xml" value="0.18125" />
         <entry key="app/src/main/res/menu/video_list_menu.xml" value="0.18125" />
-        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.173" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.13" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.173" />
       </map>
     </option>
