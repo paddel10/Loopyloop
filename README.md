@@ -19,9 +19,5 @@ Written in Kotlin and using MediaStore, RecyclerView, ExoPlayer.
 - https://github.com/MostafaAnter/VideoPlayerInsideRecyclerView
 - https://github.com/google/ExoPlayer
 
-## Todo
-- Video list view: Swipe to delete a video
-- Video list view: switch to video player if orientation of device is in landscape
-
 ## Known bugs
 The app is far from perfect - please see https://github.com/paddel10/Loopyloop/issues
