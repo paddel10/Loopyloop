@@ -24,5 +24,4 @@ Written in Kotlin and using MediaStore, RecyclerView, ExoPlayer.
 - Video list view: switch to video player if orientation of device is in landscape
 
 ## Known bugs
-The app is far from perfect
-- Video list view: Videos do not load properly.
+The app is far from perfect - please see https://github.com/paddel10/Loopyloop/issues
