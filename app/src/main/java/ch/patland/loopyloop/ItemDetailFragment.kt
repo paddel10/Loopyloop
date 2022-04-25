@@ -1,13 +1,14 @@
 package ch.patland.loopyloop
 
-import android.content.ClipData
+import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,39 +16,25 @@ import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_CURRENT_POSITION
 import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_IS_MUTE
 import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_URI
 import ch.patland.loopyloop.databinding.FragmentItemDetailBinding
-
 import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaItem
-import ch.patland.loopyloop.placeholder.PlaceholderContent
-import ch.patland.loopyloop.utils.PlayerViewAdapter
+import ch.patland.loopyloop.model.MediaViewModel
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentPosition
+import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentVideoPlayingIndex
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.playIndexThenPausePreviousPlayer
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.releaseAllPlayers
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOffVolume
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOnVolume
 import ch.patland.loopyloop.utils.RecyclerViewScrollListener
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a [ItemListFragment]
- * in two-pane mode (on larger screen devices) or self-contained
- * on handsets.
- */
 class ItemDetailFragment : Fragment() {
     private val TAG = "ItemDetailFragment"
-    private var mAdapter: VideosRecyclerAdapter? = null
+    private lateinit var mAdapter: VideosRecyclerAdapter
+    private lateinit var mMediaViewModel: MediaViewModel
     protected var mAppPrefs: AppPrefs = AppPrefs()
-    /**
-     * The placeholder content this fragment is presenting.
-     */
-    private var item: PlaceholderContent.PlaceholderItem? = null
-    // private lateinit var mediaItemList: List<MediaItem>;
 
     private var directoryId: String? = null
     private var directory: String? = null
-
-    // lateinit var itemDetailTextView: TextView
-    // private var toolbarLayout: CollapsingToolbarLayout? = null
 
     private var _binding: FragmentItemDetailBinding? = null
 
@@ -55,27 +42,13 @@ class ItemDetailFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val dragListener = View.OnDragListener { v, event ->
-        if (event.action == DragEvent.ACTION_DROP) {
-            val clipDataItem: ClipData.Item = event.clipData.getItemAt(0)
-            val dragData = clipDataItem.text
-            item = PlaceholderContent.ITEM_MAP[dragData]
-            updateContent()
-        }
-        true
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
             if (it.containsKey(ARG_ITEM_ID)) {
-                // Load the placeholder content specified by the fragment
-                // arguments. In a real-world scenario, use a Loader
-                // to load content from a content provider.
                 directoryId = it.getString(ARG_ITEM_ID)
                 directory = it.getString(ARG_ITEM_DIRECTORY)
-                // item = PlaceholderContent.ITEM_MAP[it.getString(ARG_ITEM_ID)]
             }
         }
     }
@@ -88,10 +61,7 @@ class ItemDetailFragment : Fragment() {
         _binding = FragmentItemDetailBinding.inflate(inflater, container, false)
         val rootView = binding.root
 
-        // toolbarLayout = binding.toolbarLayout
-        //itemDetailTextView = binding.itemDetail
         updateContent()
-        rootView.setOnDragListener(dragListener)
 
         setHasOptionsMenu(true)
         return rootView
@@ -133,6 +103,7 @@ class ItemDetailFragment : Fragment() {
         }
         return super.onOptionsItemSelected(item)
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -142,7 +113,6 @@ class ItemDetailFragment : Fragment() {
         val scrollListener = object : RecyclerViewScrollListener() {
             // Called when end of scroll is reached.
             override fun onItemIsFirstVisibleItem(index: Int) {
-                Log.d("visible item index", index.toString())
                 // play just visible item
                 if (index != -1)
                     playIndexThenPausePreviousPlayer(index)
@@ -152,14 +122,20 @@ class ItemDetailFragment : Fragment() {
 
         val mediaCursor = MediaCursor(requireContext())
         val values = mediaCursor.findItemsByBucketId(directoryId!!)
-        mAdapter = VideosRecyclerAdapter(requireActivity(), values)
 
-        mAdapter!!.SetOnItemClickListener(object : VideosRecyclerAdapter.OnItemClickListener {
+        mMediaViewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
+
+        mAdapter = VideosRecyclerAdapter(requireActivity())
+
+        mMediaViewModel.mediaItemsLiveData.observe(viewLifecycleOwner, Observer { mediaItems ->
+            //update files in adapter
+            mAdapter.updateList(mediaItems)
+        })
+        mMediaViewModel.postMediaItems(values)
+
+        mAdapter.SetOnItemClickListener(object : VideosRecyclerAdapter.OnItemClickListener {
             override fun onItemClick(view: View?, position: Int, model: MediaItem?) {
-                val bundle = Bundle()
-                bundle.putString(ARG_URI, model?.uri.toString())
-                bundle.putBoolean(ARG_IS_MUTE, mAppPrefs.getMuteChecked(requireContext()))
-                bundle.putLong(ARG_CURRENT_POSITION, getCurrentPosition(position))
+                val bundle = getBundleForVideoDetail(model?.uri, getCurrentPosition(position))
                 view?.findNavController()?.navigate(R.id.action_item_detail_fragment_to_videoDetailFragment, bundle)
             }
         })
@@ -167,32 +143,60 @@ class ItemDetailFragment : Fragment() {
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = mAdapter
+
+        // swipe to delete
+        /*val swipeToDeleteCallback: SwipeToDeleteCallback = object : SwipeToDeleteCallback() {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val pos = viewHolder.absoluteAdapterPosition
+                val mediaItem: MediaItem = mAdapter.getItem(pos)
+                // mMediaViewModel.delete(mediaItem)
+                val fileUtil = FileUtil(requireContext())
+                val uri = mediaItem.uri
+                val path = fileUtil.getFilePath(uri)
+                val fdelete = path?.let { File(it) }
+                if (fdelete!!.exists()) {
+                    if (fdelete.delete()) {
+                        Log.d("delete", "delete file successful!")
+                        // mAdapter.notifyItemRemoved(pos)
+                    }
+                }
+            }
+        }
+
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)*/
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val playingIndex = getCurrentVideoPlayingIndex()
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && playingIndex != 1) {
+            // orientation is landscape and video is playing - change to video detail fragment
+            val mediaItem: MediaItem = mAdapter.getItem(playingIndex)
+            val bundle = getBundleForVideoDetail(mediaItem.uri, getCurrentPosition(playingIndex))
+            view?.findNavController()?.navigate(R.id.action_item_detail_fragment_to_videoDetailFragment, bundle)
+        }
+    }
+
+    private fun getBundleForVideoDetail(uri: Uri?, currentPosition: Long): Bundle {
+        val bundle = Bundle()
+        bundle.putString(ARG_URI, uri.toString())
+        bundle.putBoolean(ARG_IS_MUTE, mAppPrefs.getMuteChecked(requireContext()))
+        bundle.putLong(ARG_CURRENT_POSITION, currentPosition)
+        return bundle
     }
 
     private fun updateContent() {
-        // toolbarLayout?.title = directory
         (activity as AppCompatActivity).supportActionBar?.title = directory
-
-        // Show the placeholder content as text in a TextView.
-        /*item?.let {
-            itemDetailTextView.text = "bla"//it.details
-        }*/
     }
 
     companion object {
-        /**
-         * The fragment argument representing the item ID that this fragment
-         * represents.
-         */
         const val ARG_ITEM_ID = "item_id"
         const val ARG_ITEM_DIRECTORY = "item_directory"
     }
 
     override fun onResume() {
         super.onResume()
-
-        //(activity as? AppCompatActivity)?.supportActionBar?.show()
-        Log.d("resume", "resumed")
     }
 
     override fun onDestroyView() {

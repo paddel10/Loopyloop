@@ -1,10 +1,8 @@
 package ch.patland.loopyloop
 
-import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,13 +19,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.RepeatModeUtil
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-
-/**
- * An example full-screen fragment that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 class VideoDetailFragment : Fragment() {
     private var _binding: FragmentVideoDetailBinding? = null
 
@@ -49,11 +41,7 @@ class VideoDetailFragment : Fragment() {
 
         arguments?.let {
             if (it.containsKey(ARG_URI)) {
-                // Load the placeholder content specified by the fragment
-                // arguments. In a real-world scenario, use a Loader
-                // to load content from a content provider.
                 uri = Uri.parse(it.getString(ARG_URI))
-                // item = PlaceholderContent.ITEM_MAP[it.getString(ARG_ITEM_ID)]
             }
             if (it.containsKey(ARG_IS_MUTE)) {
                 isMute = it.getBoolean(ARG_IS_MUTE)
@@ -94,9 +82,6 @@ class VideoDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initPlayer(uri)
         val playerView = view.findViewById<StyledPlayerView>(R.id.video_detail)
-        if (playerView == null) {
-            Log.d("detail", "playerView is null")
-        }
 
         playerView?.player = mPlayer
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT

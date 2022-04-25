@@ -2,7 +2,6 @@ package ch.patland.loopyloop.media
 
 import android.net.Uri
 import android.text.format.DateUtils
-import java.io.File
 import java.text.SimpleDateFormat
 import kotlin.time.Duration.Companion.milliseconds
 

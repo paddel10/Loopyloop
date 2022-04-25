@@ -11,17 +11,16 @@ import ch.patland.loopyloop.media.MediaItem
 import ch.patland.loopyloop.utils.PlayerStateCallback
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.releaseRecycledPlayers
 import com.google.android.exoplayer2.Player
-import java.util.ArrayList
 
 class VideosRecyclerAdapter(
-    private val mContext: Context,
-    private var modelList: List<MediaItem>)
+    private val mContext: Context)
    : RecyclerView.Adapter<RecyclerView.ViewHolder>(), PlayerStateCallback {
 
     private var mItemClickListener: OnItemClickListener? = null
     private val mAppPrefs: AppPrefs = AppPrefs()
+    private var modelList: List<MediaItem> = emptyList()
 
-    fun updateList(modelList: ArrayList<MediaItem>) {
+    fun updateList(modelList: List<MediaItem>) {
         this.modelList = modelList
         notifyDataSetChanged()
     }
@@ -30,9 +29,6 @@ class VideosRecyclerAdapter(
         viewGroup: ViewGroup,
         viewType: Int
     ): VideoPlayerViewHolder {
-        /*val binding: FacebookTimelineItemRecyclerListBinding = DataBindingUtil.inflate(
-            LayoutInflater.from(viewGroup.context)
-            , R.layout.item_detail_content, viewGroup, false)*/
         val binding = ItemDetailContentBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, false)
         return VideoPlayerViewHolder(binding)
     }
@@ -56,11 +52,7 @@ class VideosRecyclerAdapter(
         // getBindingAdapterPosition() or if you want the position as RecyclerView sees it,
         // you should call getAbsoluteAdapterPosition().
         // holder.absoluteAdapterPosition
-        val position = holder.absoluteAdapterPosition // holder.adapterPosition
-        Log.d("position", "bindingAdapterPosition = " + holder.bindingAdapterPosition.toString())
-        Log.d("position", "absoluteAdapterPosition = " + holder.absoluteAdapterPosition.toString())
-        Log.d("position", "layoutPosition = " + holder.layoutPosition.toString())
-        Log.d("position", "oldPosition = " + holder.oldPosition.toString())
+        val position = holder.absoluteAdapterPosition
         releaseRecycledPlayers(position)
         super.onViewRecycled(holder)
     }
@@ -69,7 +61,7 @@ class VideosRecyclerAdapter(
         return modelList.size
     }
 
-    private fun getItem(position: Int): MediaItem {
+    fun getItem(position: Int): MediaItem {
         return modelList[position]
     }
 
@@ -88,15 +80,14 @@ class VideosRecyclerAdapter(
     inner class VideoPlayerViewHolder(private val binding: ItemDetailContentBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun onBind(model: MediaItem) {
-            // handel on item click
+            // handle on item click
             binding.root.setOnClickListener {
                 mItemClickListener!!.onItemClick(
                     it,
-                    absoluteAdapterPosition,//absoluteAdapterPosition,
+                    absoluteAdapterPosition,
                     model
                 )
             }
-            Log.d("0-VideoPlayerViewHolder", "onBind() bindingAdapterPosition = " + absoluteAdapterPosition.toString())
             binding.apply {
                 dataModel = model
                 callback = this@VideosRecyclerAdapter
@@ -110,9 +101,7 @@ class VideosRecyclerAdapter(
 
     override fun onVideoBuffering(player: Player) {}
 
-    override fun onStartedPlaying(player: Player) {
-        Log.d("playvideo", "start" + player.contentDuration)
-    }
+    override fun onStartedPlaying(player: Player) {}
 
     override fun onFinishedPlaying(player: Player) {}
 

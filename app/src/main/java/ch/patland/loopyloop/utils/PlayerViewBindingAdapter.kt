@@ -2,10 +2,8 @@ package ch.patland.loopyloop.utils
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import com.google.android.exoplayer2.*
@@ -72,15 +70,16 @@ class PlayerViewAdapter {
             }
         }
 
-        /*
-        *  url is a url of stream video
-        *  progressbar for show when start buffering stream
-        * thumbnail for show before video start
-        * */
+        fun getCurrentVideoPlayingIndex(): Int {
+            if (currentPlayingVideo != null) {
+                return currentPlayingVideo!!.first
+            }
+            return -1
+        }
+
         @JvmStatic
         @BindingAdapter(value = ["video_uri", "display_name", "on_state_change", "thumbnail", "item_index", "autoPlay"], requireAll = false)
         fun StyledPlayerView.loadVideo(uri: Uri, displayName: String, callback: PlayerStateCallback, thumbnail: ImageView, item_index: Int? = null, autoPlay: Boolean = false) {
-            Log.d("PlayerViewAdapter", "loadVideo() " + uri.toString() + ", index = " + item_index.toString() + ", autoplay = " + autoPlay.toString())
             val builder = DefaultLoadControl.Builder()
             builder.setBufferDurationsMs(1000, 1000, 1000, 1000)
 
@@ -108,7 +107,7 @@ class PlayerViewAdapter {
 
             if (item_index != null)
                 playersMap[item_index] = player
-            Log.d("playersMap", "item_index = " + item_index.toString() + ", playerMap.size = " + playersMap.size.toString())
+
             if (callback.isMuted()) {
                 this.player!!.volume = 0f
             } else {
@@ -119,11 +118,9 @@ class PlayerViewAdapter {
                 override fun onPlayerError(error: PlaybackException) {
                     super.onPlayerError(error)
                     this@loadVideo.context.toast("Oops! Error occurred while playing media.")
-                    Log.d("PlayerViewAdapter", "Error while playing: " + error.message + ", oode = " + error.errorCodeName)
                 }
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
-                    Log.d("PlayerViewAdapter", "onPlayerStateChanged() " + playbackState.toString())
                     super.onPlaybackStateChanged(playbackState)
                     if (playbackState == Player.STATE_BUFFERING) {
                         callback.onVideoBuffering(player)

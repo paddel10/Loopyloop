@@ -5,9 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.lifecycle.MutableLiveData
-import java.io.File
-import java.util.*
+import ch.patland.loopyloop.utils.FileUtil
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -59,7 +57,6 @@ class MediaCursor (val context: Context) {
 
         val sortOrder = "${MediaStore.Video.Media.DISPLAY_NAME} ASC"
         val cursor = contentResolver.query(
-            // val query = ContentResolver.query(
             collection,
             projection,
             selection,
@@ -68,6 +65,7 @@ class MediaCursor (val context: Context) {
         )
 
         val list : ArrayList<MediaItem> = ArrayList()
+        val fileUtil = FileUtil(context)
 
         cursor?.use { cursor ->
             initIndex(cursor)
@@ -83,7 +81,7 @@ class MediaCursor (val context: Context) {
                 )
                 val duration: Long = cursor.getLong(durationColumn)
                 val size: Long = cursor.getLong(sizeColumn)
-                val lastModified = getLastModified(uri)
+                val lastModified = fileUtil.getLastModified(uri)
                 val mediaItem = MediaItem(id, displayName, dateTaken, dateAdded, dateModified, lastModified, duration, size, uri)
                 list.add(mediaItem)
             }
@@ -114,19 +112,13 @@ class MediaCursor (val context: Context) {
 
         val sortOrder = "${MediaStore.Video.Media.BUCKET_DISPLAY_NAME} ASC"
         val cursor = contentResolver.query(
-            // val query = ContentResolver.query(
             collection,
             projection,
             selection,
             selectionArgs,
             sortOrder
         )
-        /*
-        cursor?.also {
-            if (cursor.moveToFirst()) {
-                initIndex(cursor)
-            }
-        }*/
+
         val hashMap : HashMap<String, MediaDirectory> = HashMap()
 
         cursor?.use { cursor ->
@@ -143,44 +135,5 @@ class MediaCursor (val context: Context) {
         cursor?.close()
 
         return ArrayList(hashMap.values).sortedWith(compareBy({it.directory}))
-    }
-
-    private fun getLastModified(uri: Uri): Long {
-        val filePath = getFilePath(uri)
-        if (filePath != null) {
-            val f = File(filePath)
-            return f.lastModified()
-        }
-        return 0
-    }
-
-    private fun getFilePath(uri: Uri): String?
-    {
-        if ("content".equals(uri.scheme, ignoreCase = true)) {
-            return getDataColumn(uri)
-        } else if ("file".equals(uri.scheme, ignoreCase = true)) {
-            return uri.path
-        }
-        return null
-    }
-
-    private fun getDataColumn(uri: Uri?): String? {
-        var cursor: Cursor? = null
-        val column = "_data"
-        val projection = arrayOf(
-            column
-        )
-        try {
-            cursor = contentResolver.query(uri!!, projection, null, null,
-                null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val column_index = cursor.getColumnIndexOrThrow(column)
-                return cursor.getString(column_index)
-            }
-        } catch (e: java.lang.Exception) {
-        } finally {
-            cursor?.close()
-        }
-        return null
     }
 }
