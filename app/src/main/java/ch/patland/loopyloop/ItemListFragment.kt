@@ -1,17 +1,23 @@
 package ch.patland.loopyloop
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import ch.patland.loopyloop.databinding.FragmentItemListBinding
 import ch.patland.loopyloop.databinding.ItemListContentBinding
 import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaDirectory
+import ch.patland.loopyloop.media.MediaStoreObserver
+import ch.patland.loopyloop.model.MediaDirectoryViewModel
 
 class ItemListFragment : Fragment() {
     private var _binding: FragmentItemListBinding? = null
@@ -19,6 +25,10 @@ class ItemListFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    private lateinit var mMediaDirectoryViewModel: MediaDirectoryViewModel
+
+    var mMediaStoreObserver: MediaStoreObserver? = null
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +41,10 @@ class ItemListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mMediaDirectoryViewModel = ViewModelProvider(this).get(MediaDirectoryViewModel::class.java)
+
+        registerMediaStoreObserver()
+
         val recyclerView: RecyclerView = binding.itemList
 
         // Leaving this not using view binding as it relies on if the view is visible the current
@@ -39,23 +53,52 @@ class ItemListFragment : Fragment() {
         setupRecyclerView(recyclerView, itemDetailFragmentContainer)
     }
 
+    private fun registerMediaStoreObserver() {
+        val handler = Handler(Looper.myLooper()!!)
+        mMediaStoreObserver = MediaStoreObserver(handler)
+        requireContext().contentResolver.registerContentObserver(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            true,
+            mMediaStoreObserver!!
+        )
+    }
+
+    private fun deregisterMediaStoreObserver() {
+        if (mMediaStoreObserver !== null) {
+            requireContext().contentResolver.unregisterContentObserver(mMediaStoreObserver!!)
+        }
+    }
+
     private fun setupRecyclerView(
             recyclerView: RecyclerView,
             itemDetailFragmentContainer: View?
     ) {
         val mediaCursor = MediaCursor(requireContext())
-        recyclerView.adapter = SimpleItemRecyclerViewAdapter(
-            mediaCursor.findAllDirs(),
+        val values = mediaCursor.findAllDirs()
+        val simpleItemRecyclerViewAdapter = SimpleItemRecyclerViewAdapter(
             itemDetailFragmentContainer
         )
+        mMediaDirectoryViewModel.mediaDirectoriesLiveData.observe(viewLifecycleOwner,
+            {
+                mediaDirectories ->
+                simpleItemRecyclerViewAdapter.updateList(mediaDirectories)
+            }
+        )
+        mMediaDirectoryViewModel.postMediaDirectories(values)
+        recyclerView.adapter = simpleItemRecyclerViewAdapter
     }
 
     class SimpleItemRecyclerViewAdapter(
-            private val values: List<MediaDirectory>,
             private val itemDetailFragmentContainer: View?
     ) :
             RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
         private val TAG = "SimpleItemRecyclerViewAdapter"
+        private var values: List<MediaDirectory> = emptyList()
+
+        fun updateList(modelList: List<MediaDirectory>) {
+            values = modelList
+            notifyDataSetChanged()
+        }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
             val binding = ItemListContentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -110,5 +153,6 @@ class ItemListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        deregisterMediaStoreObserver()
     }
 }
