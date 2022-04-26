@@ -18,7 +18,7 @@ import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_URI
 import ch.patland.loopyloop.databinding.FragmentItemDetailBinding
 import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaItem
-import ch.patland.loopyloop.model.MediaViewModel
+import ch.patland.loopyloop.model.MediaItemViewModel
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentPosition
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentVideoPlayingIndex
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.playIndexThenPausePreviousPlayer
@@ -30,7 +30,7 @@ import ch.patland.loopyloop.utils.RecyclerViewScrollListener
 class ItemDetailFragment : Fragment() {
     private val TAG = "ItemDetailFragment"
     private lateinit var mAdapter: VideosRecyclerAdapter
-    private lateinit var mMediaViewModel: MediaViewModel
+    private lateinit var mMediaItemViewModel: MediaItemViewModel
     protected var mAppPrefs: AppPrefs = AppPrefs()
 
     private var directoryId: String? = null
@@ -123,15 +123,15 @@ class ItemDetailFragment : Fragment() {
         val mediaCursor = MediaCursor(requireContext())
         val values = mediaCursor.findItemsByBucketId(directoryId!!)
 
-        mMediaViewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
+        mMediaItemViewModel = ViewModelProvider(this).get(MediaItemViewModel::class.java)
 
         mAdapter = VideosRecyclerAdapter(requireActivity())
 
-        mMediaViewModel.mediaItemsLiveData.observe(viewLifecycleOwner, Observer { mediaItems ->
+        mMediaItemViewModel.mediaItemsLiveData.observe(viewLifecycleOwner, Observer { mediaItems ->
             //update files in adapter
             mAdapter.updateList(mediaItems)
         })
-        mMediaViewModel.postMediaItems(values)
+        mMediaItemViewModel.postMediaItems(values)
 
         mAdapter.SetOnItemClickListener(object : VideosRecyclerAdapter.OnItemClickListener {
             override fun onItemClick(view: View?, position: Int, model: MediaItem?) {

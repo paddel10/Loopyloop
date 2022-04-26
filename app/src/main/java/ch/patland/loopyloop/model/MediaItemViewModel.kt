@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ch.patland.loopyloop.media.MediaItem
 
-class MediaViewModel: ViewModel() {
+class MediaItemViewModel: ViewModel() {
     private val mutableMediaItems: MutableLiveData<List<MediaItem>> = MutableLiveData()
     val mediaItemsLiveData: LiveData<List<MediaItem>> get() = mutableMediaItems
 
