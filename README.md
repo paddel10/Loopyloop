@@ -20,4 +20,4 @@ Written in Kotlin and using MediaStore, RecyclerView, ExoPlayer.
 - https://github.com/google/ExoPlayer
 
 ## Known bugs
-The app is far from perfect - please see https://github.com/paddel10/Loopyloop/issues
+The app is far from being perfect - please see https://github.com/paddel10/Loopyloop/issues
