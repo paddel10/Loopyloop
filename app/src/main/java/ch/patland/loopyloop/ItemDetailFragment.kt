@@ -3,6 +3,9 @@ package ch.patland.loopyloop
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.MediaStore
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -18,6 +21,8 @@ import ch.patland.loopyloop.VideoDetailFragment.Companion.ARG_URI
 import ch.patland.loopyloop.databinding.FragmentItemDetailBinding
 import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaItem
+import ch.patland.loopyloop.media.MediaStoreObserver
+import ch.patland.loopyloop.media.MediaStoreObserverInterface
 import ch.patland.loopyloop.model.MediaItemViewModel
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentPosition
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentVideoPlayingIndex
@@ -27,7 +32,7 @@ import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOffVolume
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOnVolume
 import ch.patland.loopyloop.utils.RecyclerViewScrollListener
 
-class ItemDetailFragment : Fragment() {
+class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
     private val TAG = "ItemDetailFragment"
     private lateinit var mAdapter: VideosRecyclerAdapter
     private lateinit var mMediaItemViewModel: MediaItemViewModel
@@ -35,6 +40,8 @@ class ItemDetailFragment : Fragment() {
 
     private var directoryId: String? = null
     private var directory: String? = null
+
+    var mMediaStoreObserver: MediaStoreObserver? = null
 
     private var _binding: FragmentItemDetailBinding? = null
 
@@ -144,6 +151,8 @@ class ItemDetailFragment : Fragment() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = mAdapter
 
+        registerMediaStoreObserver()
+
         // swipe to delete
         /*val swipeToDeleteCallback: SwipeToDeleteCallback = object : SwipeToDeleteCallback() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -178,6 +187,22 @@ class ItemDetailFragment : Fragment() {
         }
     }
 
+    private fun registerMediaStoreObserver() {
+        val handler = Handler(Looper.myLooper()!!)
+        mMediaStoreObserver = MediaStoreObserver(this, handler)
+        requireContext().contentResolver.registerContentObserver(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            true,
+            mMediaStoreObserver!!
+        )
+    }
+
+    private fun deregisterMediaStoreObserver() {
+        if (mMediaStoreObserver !== null) {
+            requireContext().contentResolver.unregisterContentObserver(mMediaStoreObserver!!)
+        }
+    }
+
     private fun getBundleForVideoDetail(uri: Uri?, currentPosition: Long): Bundle {
         val bundle = Bundle()
         bundle.putString(ARG_URI, uri.toString())
@@ -202,10 +227,17 @@ class ItemDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        deregisterMediaStoreObserver()
     }
 
     override fun onPause() {
         super.onPause()
         releaseAllPlayers()
+    }
+
+    override fun updateMediaItems() {
+        val mediaCursor = MediaCursor(requireContext())
+        val values = mediaCursor.findItemsByBucketId(directoryId!!)
+        mMediaItemViewModel.postMediaItems(values)
     }
 }

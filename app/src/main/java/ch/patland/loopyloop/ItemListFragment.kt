@@ -17,9 +17,10 @@ import ch.patland.loopyloop.databinding.ItemListContentBinding
 import ch.patland.loopyloop.media.MediaCursor
 import ch.patland.loopyloop.media.MediaDirectory
 import ch.patland.loopyloop.media.MediaStoreObserver
+import ch.patland.loopyloop.media.MediaStoreObserverInterface
 import ch.patland.loopyloop.model.MediaDirectoryViewModel
 
-class ItemListFragment : Fragment() {
+class ItemListFragment : Fragment(), MediaStoreObserverInterface {
     private var _binding: FragmentItemListBinding? = null
 
     // This property is only valid between onCreateView and
@@ -55,7 +56,7 @@ class ItemListFragment : Fragment() {
 
     private fun registerMediaStoreObserver() {
         val handler = Handler(Looper.myLooper()!!)
-        mMediaStoreObserver = MediaStoreObserver(handler)
+        mMediaStoreObserver = MediaStoreObserver(this, handler)
         requireContext().contentResolver.registerContentObserver(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             true,
@@ -78,12 +79,10 @@ class ItemListFragment : Fragment() {
         val simpleItemRecyclerViewAdapter = SimpleItemRecyclerViewAdapter(
             itemDetailFragmentContainer
         )
-        mMediaDirectoryViewModel.mediaDirectoriesLiveData.observe(viewLifecycleOwner,
-            {
-                mediaDirectories ->
-                simpleItemRecyclerViewAdapter.updateList(mediaDirectories)
-            }
-        )
+        mMediaDirectoryViewModel.mediaDirectoriesLiveData.observe(viewLifecycleOwner)
+        { mediaDirectories ->
+            simpleItemRecyclerViewAdapter.updateList(mediaDirectories)
+        }
         mMediaDirectoryViewModel.postMediaDirectories(values)
         recyclerView.adapter = simpleItemRecyclerViewAdapter
     }
@@ -154,5 +153,11 @@ class ItemListFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         deregisterMediaStoreObserver()
+    }
+
+    override fun updateMediaItems() {
+        val mediaCursor = MediaCursor(requireContext())
+        val values = mediaCursor.findAllDirs()
+        mMediaDirectoryViewModel.postMediaDirectories(values)
     }
 }
