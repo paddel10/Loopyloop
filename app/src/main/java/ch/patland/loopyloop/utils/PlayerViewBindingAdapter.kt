@@ -2,149 +2,73 @@ package ch.patland.loopyloop.utils
 
 import android.content.Context
 import android.net.Uri
-import android.view.View
+import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import ch.patland.loopyloop.media.MediaItem
+import ch.patland.loopyloop.player.ThePlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSource
 
 // extension function for show toast
 fun Context.toast(text: String){
     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 }
 
-class PlayerViewAdapter {
+class PlayerViewAdapter() {
 
-    companion object{
-        // for hold all players generated
-        private var playersMap: MutableMap<Int, ExoPlayer>  = mutableMapOf()
-        // for hold current player
-        private var currentPlayingVideo: Pair<Int, ExoPlayer>? = null
+    companion object {
+        private val TAG = "ItemDetailFragment"
+        private var styledPlayerViewMap:  MutableMap<Int, StyledPlayerView>  = mutableMapOf()
+        private var thumbnailImageViewMap:  MutableMap<Int, ImageView>  = mutableMapOf()
+        private var currentStyledPlayerView: Pair<Int, StyledPlayerView>? = null
         private var currentPlayingIndex: Int = -1
-        fun releaseAllPlayers(){
-            playersMap.map {
-                it.value.release()
-            }
+
+        fun resetCurrentPlayingIndex() {
+            currentPlayingIndex = -1
         }
 
         // call when item recycled to improve performance
         fun releaseRecycledPlayers(index: Int){
-            playersMap[index]?.release()
-        }
-
-        fun turnOffVolume() {
-            playersMap.map {
-                it.value.volume = 0f
-            }
-        }
-
-        fun turnOnVolume() {
-            playersMap.map {
-                it.value.volume = 1f
-            }
-        }
-
-        fun getCurrentPosition(index: Int): Long {
-            if (playersMap[index] !== null) {
-                return playersMap[index]!!.currentPosition
-            }
-            return 0
+            styledPlayerViewMap.remove(index)
+            thumbnailImageViewMap.remove(index)
         }
 
         // call when scroll to pause any playing player
         fun pauseCurrentPlayingVideo(){
-            if (currentPlayingVideo != null){
-                currentPlayingVideo?.second?.playWhenReady = false
+            if (currentStyledPlayerView != null) {
+                currentStyledPlayerView?.second?.player = null
             }
         }
 
-        fun playIndexThenPausePreviousPlayer(index: Int){
-            if (playersMap.get(index)?.playWhenReady == false) {
+        fun playIndexThenPausePreviousPlayer(index: Int, mediaItem: MediaItem, thePlayer: ThePlayer){
+            if (!currentPlayingIndex.equals(index)) {
+                // swap video content
                 pauseCurrentPlayingVideo()
-                playersMap.get(index)?.playWhenReady = true
-                currentPlayingVideo = Pair(index, playersMap.get(index)!!)
+                currentPlayingIndex = index
+                currentStyledPlayerView = Pair(index, styledPlayerViewMap.get(index)!!)
+                val thumbnailView = thumbnailImageViewMap.get(index)
+                thePlayer.setMediaUri(mediaItem.uri, thumbnailView!!)
+                currentStyledPlayerView!!.second.player = thePlayer.getPlayer()
             }
         }
 
         fun getCurrentVideoPlayingIndex(): Int {
-            if (currentPlayingVideo != null) {
-                return currentPlayingVideo!!.first
-            }
-            return -1
+            return currentPlayingIndex
         }
 
         @JvmStatic
         @BindingAdapter(value = ["video_uri", "display_name", "on_state_change", "thumbnail", "item_index", "autoPlay"], requireAll = false)
         fun StyledPlayerView.loadVideo(uri: Uri, displayName: String, callback: PlayerStateCallback, thumbnail: ImageView, item_index: Int? = null, autoPlay: Boolean = false) {
-            val builder = DefaultLoadControl.Builder()
-            builder.setBufferDurationsMs(1000, 1000, 1000, 1000)
-
-            val player = ExoPlayer.Builder(context).setLoadControl(builder.build()).build() // ExoPlayer.Builder(context).build()
-            player.playWhenReady = autoPlay
-            player.repeatMode = Player.REPEAT_MODE_ALL
             // When changing track, retain the latest frame instead of showing a black screen
             setKeepContentOnPlayerReset(true)
-            // We'll show the controller, change to true if want controllers as pause and start
             this.useController = false
+            this.keepScreenOn = true
 
-            val dataSourceFactory = DefaultDataSource.Factory(context)
-            // Create a progressive media source pointing to a stream uri.
-            val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri))
-            player.setMediaSource(mediaSource)
-
-            player.prepare()
-
-            this.player = player
-
-            // add player with its index to map
-            if (playersMap.containsKey(item_index))
-                playersMap.remove(item_index)
-
-            if (item_index != null)
-                playersMap[item_index] = player
-
-            if (callback.isMuted()) {
-                this.player!!.volume = 0f
-            } else {
-                this.player!!.volume = 1f
+            if (item_index != null) {
+                styledPlayerViewMap[item_index] = this
+                thumbnailImageViewMap[item_index] = thumbnail
             }
-            this.player!!.addListener(object : Player.Listener {
-
-                override fun onPlayerError(error: PlaybackException) {
-                    super.onPlayerError(error)
-                    this@loadVideo.context.toast("Oops! Error occurred while playing media.")
-                }
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    super.onPlaybackStateChanged(playbackState)
-                    if (playbackState == Player.STATE_BUFFERING) {
-                        callback.onVideoBuffering(player)
-                        // Buffering..
-                        // set progress bar visible here
-                        // set thumbnail visible
-                        thumbnail.visibility = View.VISIBLE
-                    }
-
-                    if (playbackState == Player.STATE_READY) {
-                        // set thumbnail gone
-                        thumbnail.visibility = View.GONE
-                        callback.onVideoDurationRetrieved(
-                            this@loadVideo.player!!.duration,
-                            player
-                        )
-                    }
-
-                    if (playbackState == Player.STATE_READY && player.playWhenReady) {
-                        // [PlayerView] has started playing/resumed the video
-                        callback.onStartedPlaying(player)
-                    }
-                }
-            })
         }
     }
 }

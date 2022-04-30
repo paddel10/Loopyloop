@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ch.patland.loopyloop.databinding.ItemDetailContentBinding
 import ch.patland.loopyloop.media.MediaItem
+import ch.patland.loopyloop.player.ThePlayer
 import ch.patland.loopyloop.utils.PlayerStateCallback
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.releaseRecycledPlayers
 import com.google.android.exoplayer2.Player
@@ -19,10 +20,15 @@ class VideosRecyclerAdapter(
     private var mItemClickListener: OnItemClickListener? = null
     private val mAppPrefs: AppPrefs = AppPrefs()
     private var modelList: List<MediaItem> = emptyList()
+    private var mPlayer: ThePlayer = ThePlayer(mContext)
 
     fun updateList(modelList: List<MediaItem>) {
         this.modelList = modelList
         notifyDataSetChanged()
+    }
+
+    fun getPlayer(): ThePlayer {
+        return mPlayer
     }
 
     override fun onCreateViewHolder(
@@ -36,7 +42,6 @@ class VideosRecyclerAdapter(
     override fun onBindViewHolder(
         holder: RecyclerView.ViewHolder,
         position: Int) {
-        Log.d("0-VideosRecyclderAdapter", "onBindViewHolder() called, position = " + position.toString())
         //Here you can fill your row view
         if (holder is VideoPlayerViewHolder) {
             val model = getItem(position)
@@ -51,7 +56,6 @@ class VideosRecyclerAdapter(
         // If you are calling this in the context of an Adapter, you probably want to call
         // getBindingAdapterPosition() or if you want the position as RecyclerView sees it,
         // you should call getAbsoluteAdapterPosition().
-        // holder.absoluteAdapterPosition
         val position = holder.absoluteAdapterPosition
         releaseRecycledPlayers(position)
         super.onViewRecycled(holder)
@@ -88,10 +92,11 @@ class VideosRecyclerAdapter(
                     model
                 )
             }
+            // binding with item_detail_content.xml
             binding.apply {
                 dataModel = model
                 callback = this@VideosRecyclerAdapter
-                index = absoluteAdapterPosition // absoluteAdapterPosition
+                index = absoluteAdapterPosition
                 executePendingBindings()
             }
         }

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -24,19 +25,16 @@ import ch.patland.loopyloop.media.MediaItem
 import ch.patland.loopyloop.media.MediaStoreObserver
 import ch.patland.loopyloop.media.MediaStoreObserverInterface
 import ch.patland.loopyloop.model.MediaItemViewModel
-import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentPosition
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.getCurrentVideoPlayingIndex
 import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.playIndexThenPausePreviousPlayer
-import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.releaseAllPlayers
-import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOffVolume
-import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.turnOnVolume
+import ch.patland.loopyloop.utils.PlayerViewAdapter.Companion.resetCurrentPlayingIndex
 import ch.patland.loopyloop.utils.RecyclerViewScrollListener
 
 class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
     private val TAG = "ItemDetailFragment"
     private lateinit var mAdapter: VideosRecyclerAdapter
     private lateinit var mMediaItemViewModel: MediaItemViewModel
-    protected var mAppPrefs: AppPrefs = AppPrefs()
+    private var mAppPrefs: AppPrefs = AppPrefs()
 
     private var directoryId: String? = null
     private var directory: String? = null
@@ -82,10 +80,10 @@ class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
         val item = menu.findItem(R.id.action_mute)
         item.isChecked = isChecked
         if (isChecked) {
-            turnOffVolume()
+            mAdapter.getPlayer().turnOffVolume()
             item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_off_24)
         } else {
-            turnOnVolume()
+            mAdapter.getPlayer().turnOnVolume()
             item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_up_24)
         }
     }
@@ -100,10 +98,10 @@ class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
             item.isChecked = !item.isChecked
             mAppPrefs.setMuteChecked(requireContext(), item.isChecked)
             if (item.isChecked) {
-                turnOffVolume()
+                mAdapter.getPlayer().turnOffVolume()
                 item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_off_24)
             } else {
-                turnOnVolume()
+                mAdapter.getPlayer().turnOnVolume()
                 item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_volume_up_24)
             }
             return true
@@ -121,8 +119,10 @@ class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
             // Called when end of scroll is reached.
             override fun onItemIsFirstVisibleItem(index: Int) {
                 // play just visible item
-                if (index != -1)
-                    playIndexThenPausePreviousPlayer(index)
+                if (index != -1) {
+                    val mediaItem = mAdapter.getItem(index)
+                    playIndexThenPausePreviousPlayer(index, mediaItem, mAdapter.getPlayer())
+                }
             }
         }
         recyclerView.addOnScrollListener(scrollListener)
@@ -142,7 +142,8 @@ class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
 
         mAdapter.SetOnItemClickListener(object : VideosRecyclerAdapter.OnItemClickListener {
             override fun onItemClick(view: View?, position: Int, model: MediaItem?) {
-                val bundle = getBundleForVideoDetail(model?.uri, getCurrentPosition(position))
+                resetCurrentPlayingIndex()
+                val bundle = getBundleForVideoDetail(model?.uri, mAdapter.getPlayer().getPlayer().currentPosition)
                 view?.findNavController()?.navigate(R.id.action_item_detail_fragment_to_videoDetailFragment, bundle)
             }
         })
@@ -182,7 +183,7 @@ class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && playingIndex != 1) {
             // orientation is landscape and video is playing - change to video detail fragment
             val mediaItem: MediaItem = mAdapter.getItem(playingIndex)
-            val bundle = getBundleForVideoDetail(mediaItem.uri, getCurrentPosition(playingIndex))
+            val bundle = getBundleForVideoDetail(mediaItem.uri, mAdapter.getPlayer().getPlayer().currentPosition)
             view?.findNavController()?.navigate(R.id.action_item_detail_fragment_to_videoDetailFragment, bundle)
         }
     }
@@ -228,11 +229,12 @@ class ItemDetailFragment : Fragment(), MediaStoreObserverInterface {
         super.onDestroyView()
         _binding = null
         deregisterMediaStoreObserver()
+        mAdapter.getPlayer().releasePlayer()
     }
 
     override fun onPause() {
         super.onPause()
-        releaseAllPlayers()
+        mAdapter.getPlayer().pausePlayer()
     }
 
     override fun updateMediaItems() {
