@@ -24,7 +24,6 @@ class ItemDetailHostActivity : AppCompatActivity(), EasyPermissions.PermissionCa
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d(TAG, "onCreate() called")
         val binding = ActivityItemDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

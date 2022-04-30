@@ -14,13 +14,11 @@ abstract class RecyclerViewScrollListener : RecyclerView.OnScrollListener() {
     private var mPreLoadCount = 0
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         super.onScrolled(recyclerView, dx, dy)
-        Log.d(TAG, "onScrolled() " + mEnabled.toString())
         if (mEnabled) {
             val manager = recyclerView.layoutManager
             require(manager is LinearLayoutManager) { "Expected recyclerview to have linear layout manager" }
             val mLayoutManager = manager
             visibleItemCount = mLayoutManager.childCount
-            Log.d(TAG, "visibleItemCount = " + visibleItemCount.toString())
             firstVisibleItem = mLayoutManager.findFirstCompletelyVisibleItemPosition()
             onItemIsFirstVisibleItem(firstVisibleItem)
         }
